@@ -4,5 +4,5 @@ from .models import Prayer
 class PrayerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Prayer
-        fields = ['id', 'prayer_title', 'prayer_content', 'prayer_pdf_urls', 'prayer_youtube_urls', 'view']
+        fields = ['id', 'prayer_title', 'prayer_content', 'prayer_pdf_urls', 'prayer_youtube_urls', 'view','img_url']
 

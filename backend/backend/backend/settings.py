@@ -39,7 +39,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'my_app',
+    'django_elasticsearch_dsl',
 ]
+
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': 'http://localhost:9200',  # Adjust this if your Elasticsearch is on a different host or port
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

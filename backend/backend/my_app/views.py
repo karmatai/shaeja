@@ -3,7 +3,8 @@ from .models import Prayer
 from .serializers import PrayerSerializer
 from django.http import JsonResponse
 from django.views import View
-from fuzzywuzzy import fuzz
+from django_elasticsearch_dsl.search import Search
+from .search_indexes import PrayerDocument
 
 class PrayerListCreate(generics.ListCreateAPIView):
     queryset = Prayer.objects.all()
@@ -15,25 +16,26 @@ class PrayerDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class SearchPrayerView(View):
     def get(self, request, *args, **kwargs):
-        query = request.GET.get('phrase', '').strip().lower()
         
-        # Fetch all prayers
-        prayers = Prayer.objects.all()
+        query = request.GET.get('phrase', '')
         
-        results = []
-        for prayer in prayers:
-            # Calculate the similarity score between the query and prayer content
-            similarity = fuzz.partial_ratio(query, prayer.prayer_content.lower())
-            
-            if similarity >= 90:  # Adjust this threshold as needed
-                results.append({
-                    'title': prayer.prayer_title,
-                    'pdf_urls': prayer.prayer_pdf_urls,
-                    'youtube_urls': prayer.prayer_youtube_urls,
-                    'similarity': similarity,  # Optional: include similarity score in the response
-                })
+        search = PrayerDocument.search().query('fuzzy', prayer_content={
+            'value': query,
+            'fuzziness': 'auto'
+        })
         
-        # Sort results by similarity score (optional)
-        results = sorted(results, key=lambda x: x['similarity'], reverse=True)
+        try:
+            response = search.execute()
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+        
+        results = [
+            {
+                'title': hit.prayer_title,
+                'pdf_urls': hit.prayer_pdf_urls,
+                'youtube_urls': hit.prayer_youtube_urls,
+                'score': hit.meta.score,
+            } for hit in response
+        ]
         
         return JsonResponse(results, safe=False)
