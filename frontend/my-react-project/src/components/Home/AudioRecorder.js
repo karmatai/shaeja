@@ -117,7 +117,7 @@ const AudioRecorder = () => {
                     stopRecording();
                 }, 120000);
 
-                mediaRecorder.current.ondataavailable = (event: any) => {
+                mediaRecorder.current.ondataavailable = (event) => {
                     if (typeof event.data === "undefined") return;
                     if (event.data.size === 0) return;
                     localAudioChunks.push(event?.data);
@@ -128,67 +128,151 @@ const AudioRecorder = () => {
             }
         }
     };
-    const stopRecording = () => {
+    // const stopRecording = () => {
+    //     if (stopRecordingTimeout) {
+    //         clearTimeout(stopRecordingTimeout);
+    //     }
+
+    //     // setRecording(false);
+    //     //stops the recording instance
+    //     mediaRecorder.current.stop();
+    //     mediaRecorder.current.onstop = () => {
+    //         console.log("herr")
+    //         //creates a blob file from the audiochunks data
+    //         const audioBlob = new Blob(audioChunks);
+    //         // uploadAudio(audioBlob);
+    //         console.log("audioBlob", audioBlob);
+    //         getAudioResponse(audioBlob);
+    //         setTempAudioURL(URL.createObjectURL(audioBlob));
+    //         setAudioChunks([]);
+
+    //         const reader = new FileReader();
+
+    //         // Define a callback function to handle the result
+    //         reader.onload = function () {
+    //             const base64String = reader.result;
+    //         };
+
+    //         // Read the Blob as a data URL (Base64)
+    //         reader.readAsDataURL(audioBlob);
+    //     };
+    //     dispatch(setIsRecording(false));
+    //     dispatch(setDoneRecording(true));
+    // };
+    // function inputReplace(input) {
+    //     let result = input.replace(/\u0F38/g, "");
+    //     return result;
+    // }
+    // const getAudioResponse = async (audioBlob) => {
+    //     console.log("inside getAudioResponse");
+    //     let data;
+    //     try {
+    //         let formData = new FormData();
+    //         formData.append("input", inputReplace(audioBlob));
+
+    //         // formData.append("amplify", AMPLIFICATION_LEVEL.toString());
+
+    //         let response = await fetch('https://api.staging.monlam.ai' + "/stt/playground", {
+    //             method: "POST",
+    //             body: formData,
+    //             headers: {
+    //                 "x-api-key": '1d10358d507fd825c26711e370eda9a8as',
+    //             },
+    //         });
+    //         data = await response.json();
+    //     } catch (e) {
+    //         console.log("insede catch", e);
+    //         return {
+    //             error: 'error get audio response',
+    //         };
+    //     }
+    //     const { output, responseTime } = data;
+    //     console.log("output", output);
+    // }
+
+    const stopRecording = async () => {
         if (stopRecordingTimeout) {
             clearTimeout(stopRecordingTimeout);
         }
 
-        // setRecording(false);
-        //stops the recording instance
-        mediaRecorder.current.stop();
-        mediaRecorder.current.onstop = () => {
-            console.log("herr")
-            //creates a blob file from the audiochunks data
-            const audioBlob = new Blob(audioChunks);
-            // uploadAudio(audioBlob);
-            console.log("audioBlob", audioBlob);
-            getAudioResponse(audioBlob);
-            setTempAudioURL(URL.createObjectURL(audioBlob));
-            setAudioChunks([]);
+        if (!mediaRecorder.current) return;
 
-            const reader = new FileReader();
+        try {
+            // Stop the recording instance
+            mediaRecorder.current.stop();
 
-            // Define a callback function to handle the result
-            reader.onload = function () {
-                const base64String = reader.result;
+            mediaRecorder.current.onstop = async () => {
+                console.log("Recording stopped");
+
+                // Create a blob file from the audioChunks data
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                setTempAudioURL(URL.createObjectURL(audioBlob));
+                setAudioChunks([]);
+
+                try {
+                    const base64String = await readBlobAsDataURL(audioBlob);
+                    console.log("Base64 Audio String:", base64String);
+                    await getAudioResponse(audioBlob);
+                } catch (err) {
+                    console.error("Error reading audio blob:", err);
+                }
             };
 
-            // Read the Blob as a data URL (Base64)
-            reader.readAsDataURL(audioBlob);
-        };
-        dispatch(setIsRecording(false));
-        dispatch(setDoneRecording(true));
+            dispatch(setIsRecording(false));
+            dispatch(setDoneRecording(true));
+
+        } catch (error) {
+            console.error("Error stopping recording:", error);
+        }
     };
-    function inputReplace(input) {
-        let result = input.replace(/\u0F38/g, "");
-        return result;
-    }
+
+    // Helper function to read a Blob as a Base64 string
+    const readBlobAsDataURL = (blob) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    };
+
+    // Utility function to clean the input (if needed)
+    const inputReplace = (input) => input.replace(/\u0F38/g, "");
+
+    // Function to send the audio data to the server
     const getAudioResponse = async (audioBlob) => {
         console.log("inside getAudioResponse");
-        let data;
+
+        let formData = new FormData();
+        formData.append("input", audioBlob);
+
         try {
-            let formData = new FormData();
-            formData.append("input", audioBlob);
-
-            // formData.append("amplify", AMPLIFICATION_LEVEL.toString());
-
-            let response = await fetch('https://api.staging.monlam.ai' + "/tts/playground", {
+            let response = await fetch('https://api.staging.monlam.ai/stt/playground', {
                 method: "POST",
                 body: formData,
                 headers: {
                     "x-api-key": '1d10358d507fd825c26711e370eda9a8as',
                 },
             });
-            data = await response.json();
-        } catch (e) {
-            console.log("insede catch", e);
+
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const { output, responseTime } = data;
+            console.log("output", output);
+
+            return { output, responseTime };
+
+        } catch (error) {
+            console.error("Error in getAudioResponse:", error);
             return {
-                error: 'error get audio response',
+                error: 'Error fetching audio response',
             };
         }
-        const { output, responseTime } = data;
-        console.log("output", output);
-    }
+    };
+
     return (
         <>
             {isRecording && mediaRecorder.current && getBrowser() !== "Safari" && (
