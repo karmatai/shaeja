@@ -27,6 +27,7 @@ class SearchPrayerView(View):
             'prayer_title',
             'prayer_pdf_urls',
             'prayer_youtube_urls',
+            'img_url',
         )
         
         # Format results
@@ -36,6 +37,7 @@ class SearchPrayerView(View):
                 'title': result['prayer_title'],
                 'pdf_urls': result['prayer_pdf_urls'],
                 'youtube_urls': result['prayer_youtube_urls'],
+                'img_url': result['img_url']
             } for result in results
         ]
         
