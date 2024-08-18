@@ -1,14 +1,8 @@
-from django.contrib.auth.models import Group, User
 from rest_framework import serializers
+from .models import Prayer
 
-
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class PrayerSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = ['url', 'username', 'email', 'groups']
+        model = Prayer
+        fields = ['id', 'prayer_title', 'prayer_content', 'prayer_pdf_urls', 'prayer_youtube_urls', 'view','img_url']
 
-
-class GroupSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Group
-        fields = ['url', 'name']

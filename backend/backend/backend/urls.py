@@ -14,19 +14,13 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.urls import path
 from django.contrib import admin
-from django.urls import path,include
-from rest_framework import routers
-
-from backend.my_app import views
-
-router = routers.DefaultRouter()
-router.register(r'users', views.UserViewSet)
-router.register(r'groups', views.GroupViewSet)
+from my_app.views import PrayerListCreate, PrayerDetail,SearchPrayerView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include(router.urls)),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+    path('prayers/', PrayerListCreate.as_view(), name='prayer-list-create'),
+    path('prayers/<int:pk>/', PrayerDetail.as_view(), name='prayer-detail'),
+    path('search/', SearchPrayerView.as_view(), name='search-prayer'),
 ]
-
