@@ -137,9 +137,12 @@ const AudioRecorder = () => {
         //stops the recording instance
         mediaRecorder.current.stop();
         mediaRecorder.current.onstop = () => {
+            console.log("herr")
             //creates a blob file from the audiochunks data
             const audioBlob = new Blob(audioChunks);
             // uploadAudio(audioBlob);
+            console.log("audioBlob", audioBlob);
+            getAudioResponse(audioBlob);
             setTempAudioURL(URL.createObjectURL(audioBlob));
             setAudioChunks([]);
 
@@ -156,6 +159,36 @@ const AudioRecorder = () => {
         dispatch(setIsRecording(false));
         dispatch(setDoneRecording(true));
     };
+    function inputReplace(input) {
+        let result = input.replace(/\u0F38/g, "");
+        return result;
+    }
+    const getAudioResponse = async (audioBlob) => {
+        console.log("inside getAudioResponse");
+        let data;
+        try {
+            let formData = new FormData();
+            formData.append("input", audioBlob);
+
+            // formData.append("amplify", AMPLIFICATION_LEVEL.toString());
+
+            let response = await fetch('https://api.staging.monlam.ai' + "/tts/playground", {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "x-api-key": '1d10358d507fd825c26711e370eda9a8as',
+                },
+            });
+            data = await response.json();
+        } catch (e) {
+            console.log("insede catch", e);
+            return {
+                error: 'error get audio response',
+            };
+        }
+        const { output, responseTime } = data;
+        console.log("output", output);
+    }
     return (
         <>
             {isRecording && mediaRecorder.current && getBrowser() !== "Safari" && (

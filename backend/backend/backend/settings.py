@@ -39,14 +39,15 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'my_app',
-    'django_elasticsearch_dsl',
+    'corsheaders',
+    # 'django_elasticsearch_dsl',
 ]
 
-ELASTICSEARCH_DSL = {
-    'default': {
-        'hosts': 'http://localhost:9200',  # Adjust this if your Elasticsearch is on a different host or port
-    },
-}
+# ELASTICSEARCH_DSL = {
+#     'default': {
+#         'hosts': 'http://localhost:9200',  # Adjust this if your Elasticsearch is on a different host or port
+#     },
+# }
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -56,7 +57,15 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # If you are running React on localhost
+    "https://your-frontend-domain.com",  # Your production frontend domain
+]
+
+
 
 ROOT_URLCONF = 'backend.urls'
 
