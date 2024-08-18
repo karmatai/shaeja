@@ -21,4 +21,30 @@ class PrayerDocument(Document):
         fields = [
             'prayer_title',
             'prayer_content',
+            'id'  # Add the ID field to the indexed document
         ]
+    
+    class Django:
+        model = Prayer
+        fields = [
+            'prayer_title',
+            'prayer_content',
+            'id',  # Make sure 'id' is included
+        ]
+
+    # Add any custom fields if needed
+    # For JSON fields, consider using a custom field type or custom method to handle them
+    @property
+    def prayer_pdf_urls(self):
+        return self.instance.prayer_pdf_urls if self.instance else []
+
+    @property
+    def prayer_youtube_urls(self):
+        return self.instance.prayer_youtube_urls if self.instance else []
+    
+    class Meta:
+        # Ensure the custom methods are used in the document
+        fields = {
+            'pdf_urls': fields.TextField(attr='get_prayer_pdf_urls'),
+            'youtube_urls': fields.TextField(attr='get_prayer_youtube_urls'),
+        }
