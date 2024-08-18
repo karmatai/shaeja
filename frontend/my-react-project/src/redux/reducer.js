@@ -1,10 +1,11 @@
-import { LOG_IN, LOG_OUT, IS_RECORDING, DONE_RECORDING  } from "./action";
+import { LOG_IN, LOG_OUT, IS_RECORDING, DONE_RECORDING,RESULT_DATA  } from "./action";
 
 const initialState = {
     isLogedIn: false,
     isRecording: false,
     doneRecording: false,
     userData: {},
+    resultdata: null,
 };
 
 const appReducer = (state = initialState, action) => {
@@ -24,6 +25,11 @@ const appReducer = (state = initialState, action) => {
         }
         case DONE_RECORDING: {
             return { ...state, doneRecording: action.payload }
+        }
+        case RESULT_DATA: {
+            return  {
+                ...state, resultdata: action.payload
+            }
         }
         default:
             return state;

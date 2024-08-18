@@ -25,33 +25,32 @@ const Image = styled('img')({
 
 export default function Detail() {
     const dispatch = useDispatch();
-    const { isRecording } = useSelector((state) => state.app);
+    const { isRecording,resultdata } = useSelector((state) => state.app);
     // const [isRecording, setIsRecording] = useState(false);
-
-    const handleMicClick = () => {
-        if(isRecording){
-            dispatch(setDoneRecording(true));
-            dispatch(setIsRecording(false));
-        } else {
-            dispatch(setIsRecording(true));
-            dispatch(setDoneRecording(false));
-        }
-    };
+console.log(resultdata);
+    
+    
   return (
       <>
-          <MicButton onClick={() => dispatch(setDoneRecording(false))}>
+        {resultdata?
+        <>
+        <MicButton onClick={() => dispatch(setDoneRecording(false))}>
               <MicIcon sx={{ fontSize: '2.5rem', color: 'black' }}  />
           </MicButton>
           <Typography variant="h4" sx={{ color: 'white', marginBottom: '10px' }}>
-              "གསོ་བའི་དམིགས་དོན་"
+              {resultdata[0].title}
           </Typography>
-          <Typography variant="subtitle1" sx={{ color: 'white', marginBottom: '20px' }}>
-              མནན་གནས་ཀུན་སྤྱོད་གཞུང་བཙུན་རྒྱལ་དུང་གི་མི་རིགས།
-          </Typography>
+          {/* <Typography variant="subtitle1" sx={{ color: 'white', marginBottom: '20px' }}>
+              {resultdata[0].}
+          </Typography> */}
           <Image src={tara} alt="Tibetan Artwork" />
-          <Typography variant="subtitle1" sx={{ color: 'white', marginBottom: '20px' }}>
-              རྩོམ་པ་བདུད་གཉན་རྒྱལ་དུང་།
+          
+          </>:
+          <Typography>
+            No data
           </Typography>
+        }
+          
     </>
   )
 }

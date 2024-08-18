@@ -5,7 +5,7 @@ import { LiveAudioVisualizer } from "react-audio-visualize";
 import { styled } from '@mui/system';
 import StopIcon from '@mui/icons-material/Stop';
 import { useDispatch, useSelector } from 'react-redux';
-import { setDoneRecording, setIsRecording } from '../../redux/action';
+import { setDoneRecording, setIsRecording, setResultData } from '../../redux/action';
 import { getBrowser } from '../utils/getBrowser';
 
 const InnerWhiteCircle = styled('div')({
@@ -117,7 +117,7 @@ const AudioRecorder = () => {
                     stopRecording();
                 }, 120000);
 
-                mediaRecorder.current.ondataavailable = (event: any) => {
+                mediaRecorder.current.ondataavailable = (event) => {
                     if (typeof event.data === "undefined") return;
                     if (event.data.size === 0) return;
                     localAudioChunks.push(event?.data);
@@ -164,7 +164,8 @@ const AudioRecorder = () => {
         return result;
     }
     const getAudioResponse = async (audioBlob) => {
-        /*console.log("inside getAudioResponse");
+        console.log("inside getAudioResponse");
+        /*
         let data;
         try {
             let formData = new FormData();
@@ -189,6 +190,7 @@ const AudioRecorder = () => {
         const { output, responseTime } = data;
         console.log("output", output);
         */
+        
         let data;
         try {
             
@@ -201,6 +203,7 @@ const AudioRecorder = () => {
             });
             data = await response.json();
             console.log(data);
+            dispatch(setResultData(data));
             /* expected data for the following phrase [{"id": 1, "title": "ཤེས་རབ་སྙིང་པོ།", "pdf_urls": {"file_link": "https://drive.google.com/file/d/1xY4VdvQ68qUqVd7fkQUi9vOT5h8nk1sZ/view?usp=drive_link"}, "youtube_urls": {"video_link": "https://www.youtube.com/watch?si=JBb2LpwqosMNaEc7&v=vNU30CGO3yI&feature=youtu.be"}}, {"id": 2, "title": "ཤེས་རབ་སྙིང་པོ།", "pdf_urls": ["https://drive.google.com/file/d/1xY4VdvQ68qUqVd7fkQUi9vOT5h8nk1sZ/view?usp=drive_link"], "youtube_urls": ["https://www.youtube.com/watch?si=JBb2LpwqosMNaEc7&v=vNU30CGO3yI&feature=youtu.be"]}, {"id": 3, "title": "གསོལ་འདེབས་བསམ་པ་ལྷུན་གྲུབ།", "pdf_urls": ["https://drive.google.com/file/d/1Sm3-5bEcbzMH8UxA3uYI-O562NpLBeYj/view?usp=drive_link"], "youtube_urls": ["https://www.youtube.com/watch?v=1AMMlmWO8ek"]}]*/
             // expected data for the "ཤེས་རབ།་" [{"id": 1, "title": "ཤེས་རབ་སྙིང་པོ།", "pdf_urls": {"file_link": "https://drive.google.com/file/d/1xY4VdvQ68qUqVd7fkQUi9vOT5h8nk1sZ/view?usp=drive_link"}, "youtube_urls": {"video_link": "https://www.youtube.com/watch?si=JBb2LpwqosMNaEc7&v=vNU30CGO3yI&feature=youtu.be"}, "img_url": "https://drive.google.com/file/d/1rDaq1LqIZctW0hY4s1U_AwWImNxZ6tE1/view?usp=drive_link"}, {"id": 3, "title": "གསོལ་འདེབས་བསམ་པ་ལྷུན་གྲུབ།", "pdf_urls": ["https://drive.google.com/file/d/1Sm3-5bEcbzMH8UxA3uYI-O562NpLBeYj/view?usp=drive_link"], "youtube_urls": ["https://www.youtube.com/watch?v=1AMMlmWO8ek"], "img_url": "https://drive.google.com/file/d/1oMnp5kCPR0dYomPSWoclga3eSLbDIMQO/view?usp=drive_link"}]
             // for "གཟུགས་མེད" [{"id": 1, "title": "ཤེས་རབ་སྙིང་པོ།", "pdf_urls": {"file_link": "https://drive.google.com/file/d/1xY4VdvQ68qUqVd7fkQUi9vOT5h8nk1sZ/view?usp=drive_link"}, "youtube_urls": {"video_link": "https://www.youtube.com/watch?si=JBb2LpwqosMNaEc7&v=vNU30CGO3yI&feature=youtu.be"}, "img_url": "https://drive.google.com/file/d/1rDaq1LqIZctW0hY4s1U_AwWImNxZ6tE1/view?usp=drive_link"}]
@@ -210,9 +213,8 @@ const AudioRecorder = () => {
                 error: 'error get audio response',
             };
         }
-        const { output, responseTime } = data;
-        console.log("output", output);
-
+        dispatch(setResultData(data));
+        
     }
     return (
         <>

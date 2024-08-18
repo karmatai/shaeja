@@ -1,7 +1,11 @@
 import React from 'react';
 import { Box } from '@mui/material';
+import { useDispatch, useSelector } from 'react-redux';
+
 
 const YouTubeVideo = ({ videoId }) => {
+    const { resultdata } = useSelector((state) => state.app);
+    console.log(resultdata);
     return (
         <Box
             sx={{
@@ -17,7 +21,7 @@ const YouTubeVideo = ({ videoId }) => {
             }}
         >
             <iframe
-                src={`https://www.youtube.com/embed/KbwNPVg_mTE`}
+                src={resultdata[0].youtube_urls.video_link}
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
